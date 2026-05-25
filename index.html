@@ -20,7 +20,7 @@
   <header class="sticky top-0 z-50 border-b border-white/10 backdrop-blur-xl bg-[#07111f]/80">
     <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
-        <img src="logo.png" alt="NovaFlow logo" class="w-11 h-11 rounded-xl object-contain shadow-lg shadow-cyan-500/20">
+        <img src="logo.png" alt="NovaFlow logo" class="w-11 h-11 rounded-xl object-contain shadow-lg shadow-cyan-500/20" onerror="this.style.display='none'">
         <span class="font-semibold text-lg tracking-wide">NovaFlow</span>
       </div>
       <nav class="hidden md:flex gap-6 text-sm text-white/75">
@@ -116,5 +116,24 @@
       </div>
     </section>
   </main>
+
+  <script>
+    const subscribeBtn = document.getElementById('subscribeBtn');
+    subscribeBtn.addEventListener('click', async () => {
+      subscribeBtn.disabled = true;
+      subscribeBtn.textContent = 'Loading...';
+      try {
+        const res = await fetch('/create-checkout-session', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Checkout failed');
+        const stripe = Stripe('pk_live_51R5wuGGP7DsRe5yNJbvwc2tLd4XoJMuEuNBAwkFePi5iESovsfcxCpUS4AVcXKMyrsjcSNSM25tFK1UGdoLCBCDv00KUx0oJVe');
+        await stripe.redirectToCheckout({ sessionId: data.id });
+      } catch (e) {
+        alert(e.message);
+        subscribeBtn.disabled = false;
+        subscribeBtn.textContent = 'Pay and Start';
+      }
+    });
+  </script>
 </body>
 </html>
